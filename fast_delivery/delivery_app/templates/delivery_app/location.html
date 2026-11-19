@@ -1,0 +1,126 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Location | FastDelivery</title>
+    <link rel="stylesheet" href="{% static 'delivery_app/style.css' %}">
+</head>
+<body>
+
+<header class="simple-header">
+    <a href="/" class="simple-logo">⚡ FastDelivery</a>
+    <a href="{% url 'cart' %}">🛒 My Cart</a>
+</header>
+
+<main class="form-page">
+    <div class="form-card">
+        <div class="form-icon">📍</div>
+        <h1>Set Your Delivery Location</h1>
+        <p class="page-subtitle">
+            Tell us where you want your order delivered.
+        </p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="notice">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <button type="button" id="getLocation" class="gps-button">
+            📍 Use My Current Location
+        </button>
+
+        <p id="locationStatus" class="location-status">
+            Click the button and allow location access in your browser.
+        </p>
+
+        <form method="POST" action="{% url 'save_location' %}">
+            {% csrf_token %}
+
+            <label>House / Flat / Street Address *</label>
+            <textarea name="house_address" rows="3" required
+                      placeholder="House number, street, area">{{ saved_location.house_address }}</textarea>
+
+            <label>Landmark (Optional)</label>
+            <input type="text" name="landmark"
+                   value="{{ saved_location.landmark }}"
+                   placeholder="Near school, shop, etc.">
+
+            <label>City *</label>
+            <input type="text" name="city" required
+                   value="{{ saved_location.city }}"
+                   placeholder="Your city">
+
+            <label>PIN Code *</label>
+            <input type="text" name="pincode" required
+                   value="{{ saved_location.pincode }}"
+                   maxlength="10" placeholder="Enter PIN code">
+
+            <input type="hidden" name="latitude" id="latitude"
+                   value="{{ saved_location.latitude }}">
+            <input type="hidden" name="longitude" id="longitude"
+                   value="{{ saved_location.longitude }}">
+
+            <button type="submit" class="primary-action">
+                Save Delivery Address
+            </button>
+        </form>
+
+        {% if saved_location.address %}
+            <div class="saved-location">
+                <strong>Previously saved location:</strong>
+                <p>{{ saved_location.address }}</p>
+            </div>
+        {% endif %}
+    </div>
+</main>
+
+<script>
+document.getElementById("getLocation").addEventListener("click", function () {
+    const status = document.getElementById("locationStatus");
+    const button = this;
+
+    if (!navigator.geolocation) {
+        status.textContent = "Geolocation is not supported by this browser.";
+        return;
+    }
+
+    button.disabled = true;
+    status.textContent = "Getting your current location...";
+
+    navigator.geolocation.getCurrentPosition(
+        function (position) {
+            document.getElementById("latitude").value =
+                position.coords.latitude;
+            document.getElementById("longitude").value =
+                position.coords.longitude;
+
+            status.textContent =
+                "✓ GPS location captured. Please enter or confirm your full address below.";
+            button.disabled = false;
+        },
+        function (error) {
+            const errors = {
+                1: "Location permission was denied. Allow it in browser settings.",
+                2: "Your location could not be determined. Try again.",
+                3: "Location request timed out. Try again."
+            };
+
+            status.textContent =
+                errors[error.code] || "Unable to get your location.";
+            button.disabled = false;
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0
+        }
+    );
+});
+</script>
+
+</body>
+</html>
