@@ -1,0 +1,281 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastDelivery | Shop More, Save More</title>
+    <link rel="stylesheet" href="{% static 'delivery_app/style.css' %}">
+</head>
+<body>
+
+<!-- TOP HEADER -->
+<header class="top-header">
+    <a href="/" class="brand">
+        <span class="brand-icon">⚡</span>
+        <span>
+            <strong>Fast<span>Delivery</span></strong>
+            <small>Shop More... Save More...</small>
+        </span>
+    </a>
+
+    <a href="{% url 'location' %}" class="location">
+    <span class="location-icon">📍</span>
+    <div>
+        <small>Delivering to · Click to change</small>
+        <strong>
+            {% if delivery_location.city %}
+                {{ delivery_location.city }} - {{ delivery_location.pincode }}
+            {% else %}
+                Set Your Location
+            {% endif %}
+        </strong>
+    </div>
+</a>
+
+    <form method="GET" action="/" class="search-box">
+        <span>🔍</span>
+        <input type="text" name="search" value="{{ search }}"
+               placeholder="Search for products...">
+        {% if selected_category %}
+            <input type="hidden" name="category" value="{{ selected_category }}">
+        {% endif %}
+        <button type="submit">Search</button>
+    </form>
+
+    <a href="/admin/" class="account-link">
+        <span>👤</span>
+        <div><strong>Account</strong><small>Admin / Sign In</small></div>
+    </a>
+
+    <a href="{% url 'cart' %}" class="cart-button">
+    🛒 Cart <span>{{ cart_count }}</span>
+    </a>
+</header>
+
+<!-- NAVIGATION -->
+<nav class="main-nav">
+    <a href="/#categories">☰ All Categories</a>
+    <a href="/?category=1#products">🛒 Groceries</a>
+    <a href="/#products">📱 Mobiles</a>
+    <a href="/#products">💻 Electronics</a>
+    <a href="/#products">👕 Fashion</a>
+    <a href="/#products">🏠 Home & Kitchen</a>
+    <a href="/#products">✨ Personal Care</a>
+    <a href="/#products">⚽ Sports</a>
+    <a href="/#products">📚 Books</a>
+    <span class="free-delivery">⚡ Special Deals Every Day</span>
+</nav>
+
+<main>
+
+    <!-- HERO AND PROMOTIONS -->
+    <section class="hero-layout">
+        <div class="hero-banner">
+            <div class="hero-text">
+                <span class="hero-label">⚡ SUPER FAST DELIVERY</span>
+                <h1>Groceries & More<br>at Your <span>Doorstep!</span></h1>
+                <p>Fresh • Affordable • Hassle-Free</p>
+                <a href="#products" class="yellow-button">Shop Now →</a>
+            </div>
+            <div class="hero-art">
+                <div class="hero-circle"></div>
+                <span>🧺</span>
+                <span class="hero-fruit fruit-one">🍎</span>
+                <span class="hero-fruit fruit-two">🍌</span>
+                <span class="hero-fruit fruit-three">🥑</span>
+                <span class="hero-fruit fruit-four">🥕</span>
+            </div>
+        </div>
+
+        <div class="side-banners">
+            <div class="side-banner electronics-banner">
+                <div>
+                    <h2>Up to 70% OFF</h2>
+                    <p>On Electronics</p>
+                    <a href="#products">Shop Now →</a>
+                </div>
+                <span>🎧</span>
+            </div>
+
+            <div class="side-banner fashion-banner">
+                <div>
+                    <h2>Fashion Sale</h2>
+                    <p>Flat 60% OFF</p>
+                    <a href="#products">Shop Now →</a>
+                </div>
+                <span>👟</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- MESSAGES -->
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- CATEGORIES -->
+    <section class="section-block" id="categories">
+        <div class="section-heading">
+            <h2>Shop by Category <span>➜</span></h2>
+            <a href="/">View All →</a>
+        </div>
+
+        <div class="category-grid">
+            {% for category in categories %}
+            <a href="/?category={{ category.id }}#products" class="category-card">
+                {% if category.image %}
+                    <img src="{{ category.image.url }}" alt="{{ category.name }}">
+                {% else %}
+                    <div class="category-art" data-category="{{ category.name }}">
+                        <span class="category-emoji">🛍️</span>
+                    </div>
+                {% endif %}
+                <strong>{{ category.name }}</strong>
+            </a>
+            {% empty %}
+                <p>No categories available. Please add categories in Admin.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- PRODUCTS -->
+    <section class="section-block" id="products">
+        <div class="section-heading">
+            <h2>🔥 Popular Products</h2>
+            <a href="/">View All Products →</a>
+        </div>
+
+        <div class="product-grid">
+            {% for product in products %}
+            <article class="product-card">
+
+                {% if product.discount_price %}
+                    <span class="discount-badge">SPECIAL DEAL</span>
+                {% endif %}
+
+                <div class="product-image">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                    {% else %}
+                        <div class="product-art"
+                             data-category="{{ product.category.name }}"
+                             data-name="{{ product.name }}">
+                            <span class="product-emoji">🛍️</span>
+                            <span class="product-platform"></span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="product-details">
+                    <span class="delivery-tag">⚡ Fast Delivery</span>
+                    <h3>{{ product.name }}</h3>
+                    <small class="product-category">{{ product.category.name }}</small>
+
+                    <div class="price-row">
+                        {% if product.discount_price %}
+                            <strong>₹{{ product.discount_price }}</strong>
+                            <del>₹{{ product.price }}</del>
+                        {% else %}
+                            <strong>₹{{ product.price }}</strong>
+                        {% endif %}
+                    </div>
+
+                    {% if product.stock > 0 %}
+                        <p class="stock-status">✓ In Stock ({{ product.stock }})</p>
+                        <form method="POST" action="{% url 'add_to_cart' product.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="add-button">
+                                🛒 Add to Cart
+                            </button>
+                        </form>
+                    {% else %}
+                        <p class="out-stock">Currently unavailable</p>
+                        <button class="add-button disabled" disabled>Out of Stock</button>
+                    {% endif %}
+                </div>
+            </article>
+
+            {% empty %}
+                <div class="no-products">
+                    <span>🔎</span>
+                    <h3>No products found</h3>
+                    <p>Try another search or select a different category.</p>
+                    <a href="/">Show all products</a>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- PROMOTIONAL BANNERS -->
+    <section class="promotion-grid">
+        <div class="promotion fresh-promo">
+            <div>
+                <h2>Fresh Vegetables</h2>
+                <p>Straight from Farm</p>
+                <a href="#products">Shop Fresh →</a>
+            </div>
+            <span>🥦🥕🍅</span>
+        </div>
+
+        <div class="promotion saving-promo">
+            <div>
+                <h2>Big Savings</h2>
+                <p>Big Happiness</p>
+                <a href="#products">Explore Deals →</a>
+            </div>
+            <span>🎁🛍️</span>
+        </div>
+
+        <div class="promotion home-promo">
+            <div>
+                <h2>Smart Home</h2>
+                <p>Smart Living</p>
+                <a href="#products">Shop Now →</a>
+            </div>
+            <span>🍳🏠</span>
+        </div>
+    </section>
+
+    <!-- WHY US -->
+    <section class="why-us">
+        <h2>Why Shop at FastDelivery?</h2>
+        <div class="why-grid">
+            <div><span>🚀</span><strong>Quick Shopping</strong><small>Easy online ordering</small></div>
+            <div><span>💰</span><strong>Best Deals</strong><small>Great prices and offers</small></div>
+            <div><span>🛡️</span><strong>Secure Shopping</strong><small>Shop with confidence</small></div>
+            <div><span>🛒</span><strong>Many Categories</strong><small>Everything in one place</small></div>
+        </div>
+    </section>
+
+</main>
+
+<footer class="footer">
+    <div>
+        <h2>⚡ FastDelivery</h2>
+        <p>Shop More. Save More.</p>
+    </div>
+    <div>
+        <h3>Quick Links</h3>
+        <a href="/">Home</a>
+        <a href="#categories">Categories</a>
+        <a href="#products">Products</a>
+        <a href="/admin/">Admin</a>
+    </div>
+    <div>
+        <h3>Customer Support</h3>
+        <p>Easy Shopping</p>
+        <p>Quality Products</p>
+        <p>Great Offers</p>
+    </div>
+    <p class="copyright">© 2026 FastDelivery. All Rights Reserved.</p>
+</footer>
+
+<script src="{% static 'delivery_app/script.js' %}"></script>
+</body>
+</html>

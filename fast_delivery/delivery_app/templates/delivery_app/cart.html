@@ -1,0 +1,103 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Cart | FastDelivery</title>
+    <link rel="stylesheet" href="{% static 'delivery_app/style.css' %}">
+</head>
+<body>
+
+<header class="simple-header">
+    <a href="/" class="simple-logo">⚡ FastDelivery</a>
+    <a href="/">← Continue Shopping</a>
+</header>
+
+<main class="page-container">
+    <h1>🛒 My Shopping Cart</h1>
+    <p class="page-subtitle">Review your products before checkout.</p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="notice">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    {% if items %}
+    <div class="cart-layout">
+        <section class="cart-items">
+            {% for item in items %}
+            <article class="cart-item">
+                <div class="cart-product-image">
+                    {% if item.product.image %}
+                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                    {% else %}
+                        🛍️
+                    {% endif %}
+                </div>
+
+                <div class="cart-product-info">
+                    <h3>{{ item.product.name }}</h3>
+                    <p>{{ item.product.category.name }}</p>
+                    <strong>₹{{ item.price }}</strong>
+
+                    <div class="cart-actions">
+                        <form method="POST" action="{% url 'update_cart' item.product.id %}">
+                            {% csrf_token %}
+                            <label>Qty</label>
+                            <input type="number" name="quantity"
+                                   value="{{ item.quantity }}" min="1"
+                                   max="{{ item.product.stock }}">
+                            <button type="submit" class="small-action">Update</button>
+                        </form>
+
+                        <form method="POST" action="{% url 'remove_from_cart' item.product.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="remove-action">Remove</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="cart-line-total">
+                    <strong>₹{{ item.line_total }}</strong>
+                </div>
+            </article>
+            {% endfor %}
+        </section>
+
+        <aside class="summary-card">
+            <h2>Order Summary</h2>
+            <div class="summary-row">
+                <span>Items</span>
+                <strong>{{ cart_count }}</strong>
+            </div>
+            <div class="summary-row">
+                <span>Delivery</span>
+                <strong class="free-text">FREE</strong>
+            </div>
+            <div class="summary-row total-row">
+                <span>Total Amount</span>
+                <strong>₹{{ total }}</strong>
+            </div>
+            <a href="{% url 'checkout' %}" class="primary-action">
+                Proceed to Checkout →
+            </a>
+            <a href="{% url 'location' %}" class="secondary-action">
+                📍 Set Delivery Location
+            </a>
+        </aside>
+    </div>
+    {% else %}
+        <div class="empty-cart">
+            <div>🛒</div>
+            <h2>Your cart is empty</h2>
+            <p>Add some products to start shopping.</p>
+            <a href="/" class="primary-action">Start Shopping</a>
+        </div>
+    {% endif %}
+</main>
+
+</body>
+</html>

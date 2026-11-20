@@ -1,0 +1,118 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | FastDelivery</title>
+    <link rel="stylesheet" href="{% static 'delivery_app/style.css' %}">
+</head>
+<body>
+
+<header class="simple-header">
+    <a href="/" class="simple-logo">⚡ FastDelivery</a>
+    <a href="{% url 'cart' %}">← Back to Cart</a>
+</header>
+
+<main class="page-container">
+    <h1>💳 Checkout</h1>
+    <p class="page-subtitle">Almost there! Confirm your details and place your order.</p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="notice">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="checkout-layout">
+        <section class="checkout-form-card">
+            <h2>1. Customer Details</h2>
+
+            <form method="POST" id="checkoutForm">
+                {% csrf_token %}
+
+                <label>Full Name *</label>
+                <input type="text" name="customer_name" required
+                       placeholder="Enter your full name">
+
+                <label>Mobile Number *</label>
+                <input type="tel" name="phone" required
+                       pattern="[0-9+ -]{10,15}"
+                       placeholder="Enter your mobile number">
+
+                <div class="checkout-address">
+                    <div>
+                        <h2>2. Delivery Address</h2>
+                        <p>📍 {{ saved_location.address }}</p>
+                    </div>
+                    <a href="{% url 'location' %}">Change</a>
+                </div>
+
+                <h2 class="payment-heading">3. Select Payment Method</h2>
+
+                <label class="payment-option">
+                    <input type="radio" name="payment_method" value="cod" checked>
+                    <span class="payment-icon">💵</span>
+                    <span>
+                        <strong>Cash on Delivery</strong>
+                        <small>Pay when your order arrives</small>
+                    </span>
+                </label>
+
+                <label class="payment-option">
+                    <input type="radio" name="payment_method" value="upi">
+                    <span class="payment-icon">📱</span>
+                    <span>
+                        <strong>UPI Payment</strong>
+                        <small>Demo option — payment gateway not connected</small>
+                    </span>
+                </label>
+
+                <label class="payment-option">
+                    <input type="radio" name="payment_method" value="card">
+                    <span class="payment-icon">💳</span>
+                    <span>
+                        <strong>Credit / Debit Card</strong>
+                        <small>Demo option — payment gateway not connected</small>
+                    </span>
+                </label>
+
+                <p class="payment-note">
+                    UPI and Card selections are recorded as pending demo orders.
+                    No money is charged. Never enter card details on this demo page.
+                </p>
+
+                <button type="submit" class="primary-action place-order-button">
+                    Place Order • ₹{{ total }}
+                </button>
+            </form>
+        </section>
+
+        <aside class="summary-card checkout-summary">
+            <h2>Your Order</h2>
+
+            {% for item in items %}
+            <div class="checkout-product">
+                <div>
+                    <strong>{{ item.product.name }}</strong>
+                    <small>Qty: {{ item.quantity }}</small>
+                </div>
+                <strong>₹{{ item.line_total }}</strong>
+            </div>
+            {% endfor %}
+
+            <div class="summary-row">
+                <span>Delivery Fee</span>
+                <strong class="free-text">FREE</strong>
+            </div>
+            <div class="summary-row total-row">
+                <span>Grand Total</span>
+                <strong>₹{{ total }}</strong>
+            </div>
+        </aside>
+    </div>
+</main>
+
+</body>
+</html>
